@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tiger FF Tournament - Join</title>
+    <style>
+        :root { --primary: #8B0000; --accent: #FFD700; --bg: #0b0b0b; }
+        body { background-color: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; padding: 20px; }
+        .container { width: 100%; max-width: 400px; background: rgba(139, 0, 0, 0.1); border: 2px solid var(--accent); padding: 25px; border-radius: 20px; box-shadow: 0 0 30px rgba(139, 0, 0, 0.4); backdrop-filter: blur(10px); }
+        h2 { text-align: center; color: var(--accent); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 20px; }
+        
+        .match-badge { background: var(--primary); color: var(--accent); text-align: center; padding: 12px; border-radius: 10px; margin-bottom: 20px; font-weight: bold; border: 1px dashed var(--accent); }
+        .fee-info { font-size: 18px; display: block; margin-top: 5px; }
+
+        /* Payment Section */
+        .payment-section { background: #1a1a1a; padding: 15px; border-radius: 12px; text-align: center; margin-bottom: 20px; border: 1px solid #333; }
+        .qr-box { width: 180px; height: 180px; background: white; margin: 10px auto; border-radius: 10px; overflow: hidden; border: 3px solid var(--accent); display: flex; align-items: center; justify-content: center; }
+        .qr-box img { width: 100%; height: 100%; display: block; }
+
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-size: 14px; color: var(--accent); }
+        input { width: 100%; padding: 12px; background: #151515; border: 1px solid #444; border-radius: 8px; color: white; box-sizing: border-box; font-size: 16px; outline: none; }
+        input:focus { border-color: var(--accent); }
+
+        .btn-join { width: 100%; padding: 16px; background: linear-gradient(45deg, var(--primary), #cc0000); border: none; border-radius: 8px; color: var(--accent); font-weight: bold; font-size: 18px; cursor: pointer; margin-top: 10px; transition: 0.3s; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+        .btn-join:hover { transform: translateY(-2px); }
+        
+        .footer-text { font-size: 11px; color: #888; text-align: center; margin-top: 15px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>🏆 TIGER BATTLE</h2>
+    
+    <div class="match-badge">
+        <span id="displayMatch">Tiger Match</span>
+        <div class="fee-info" id="displayFee">Fee: ₹0</div>
+        <div style="font-size: 12px; color: #ccc;" id="displayTime">Time: --:--</div>
+    </div>
+
+    <div class="payment-section">
+        <p style="margin: 0 0 10px; font-weight: bold; color: var(--accent); text-transform: uppercase;">Scan to Pay</p>
+        <div class="qr-box">
+            <img id="autoQR" src="" alt="Loading QR...">
+        </div>
+        <p style="font-size: 11px; margin-top: 8px; color: #aaa;">UPI ID: <br><b>BHARATPE.8S0Y1W1Z4L61197@fbpe</b></p>
+    </div>
+
+    <form id="registrationForm">
+        <div class="form-group">
+            <label>Free Fire Name (IGN)</label>
+            <input type="text" id="playerName" placeholder="Ex: Tiger_Gamer" required>
+        </div>
+        <div class="form-group">
+            <label>FF UID</label>
+            <input type="number" id="playerUID" placeholder="Game UID" required>
+        </div>
+        <div class="form-group">
+            <label>WhatsApp Number</label>
+            <input type="tel" id="playerWA" placeholder="For Room ID/Pass" required>
+        </div>
+        <div class="form-group">
+            <label>Transaction ID (UTR)</label>
+            <input type="text" id="playerUTR" placeholder="12 Digit UTR Number" required>
+        </div>
+        <button type="submit" id="submitBtn" class="btn-join">CONFIRM ENTRY</button>
+    </form>
+    
+    <p class="footer-text">Note: Entry will be verified via UTR number.</p>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+    const firebaseConfig = { 
+        apiKey: "AIzaSyDx4Op4Z93ut30pIfnmSqW8EB4yrb772XA", 
+        authDomain: "tiger-8249f.firebaseapp.com", 
+        databaseURL: "https://tiger-8249f-default-rtdb.firebaseio.com", 
+        projectId: "tiger-8249f", 
+        storageBucket: "tiger-8249f.firebasestorage.app", 
+        messagingSenderId: "1008257292905", 
+        appId: "1:1008257292905:web:909e2557b73c89f4ee60f8" 
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const matchName = urlParams.get('match') || "Tiger Match";
+    const matchPrice = urlParams.get('price') || "10";
+    const matchTime = urlParams.get('time') || "09:00 PM";
+
+    // QR Generation Logic - Updated for reliability
+    const upiID = "BHARATPE.8S0Y1W1Z4L61197@fbpe";
+    const upiString = `upi://pay?pa=${upiID}&pn=TigerTournament&am=${matchPrice}&cu=INR`;
+    
+    // QuickChart API use kar rahe hain jo fast aur reliable hai
+    const finalQRUrl = `https://quickchart.io/qr?text=${encodeURIComponent(upiString)}&size=200&margin=1`;
+    
+    document.getElementById('autoQR').src = finalQRUrl;
+    document.getElementById('displayMatch').innerText = matchName;
+    document.getElementById('displayFee').innerText = "Fee: ₹" + matchPrice;
+    document.getElementById('displayTime').innerText = "Time: " + matchTime;
+
+    const regForm = document.getElementById('registrationForm');
+    regForm.onsubmit = async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById('submitBtn');
+        btn.innerText = "Processing...";
+        btn.disabled = true;
+
+        const entryData = {
+            name: document.getElementById('playerName').value,
+            uid: document.getElementById('playerUID').value,
+            whatsapp: document.getElementById('playerWA').value,
+            utr: document.getElementById('playerUTR').value,
+            match: matchName,
+            price: matchPrice,
+            time: matchTime,
+            timestamp: Date.now()
+        };
+
+        try {
+            const entriesRef = ref(db, 'Tournament_Entries');
+            await set(push(entriesRef), entryData);
+            alert("Entry Successful!");
+            btn.innerText = "SUCCESS ✅";
+            regForm.reset();
+        } catch (error) {
+            alert("Error: " + error.message);
+            btn.innerText = "CONFIRM ENTRY";
+            btn.disabled = false;
+        }
+    };
+</script>
+</body>
+</html>
